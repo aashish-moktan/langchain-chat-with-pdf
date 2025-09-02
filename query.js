@@ -3,16 +3,10 @@ dotenv.config();
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import readlineSync from "readline-sync";
 import { GoogleGenAI } from "@google/genai";
-import pineconeIndex from "./config/pincone.config";
+import { googleGenAIEmbeddings } from "./config";
 
 const ai = new GoogleGenAI({});
 const History = [];
-
-// cofigure embeddings
-const embeddings = new GoogleGenerativeAIEmbeddings({
-  apiKey: process.env.GEMINI_API_KEY,
-  model: "text-embedding-004",
-});
 
 // combines the previous query history in order to provide meaningful query
 async function transformQuery(prompt) {
@@ -37,12 +31,11 @@ async function transformQuery(prompt) {
 }
 
 async function chatting(prompt) {
-  // convert the question into meaning question based on past conversation
+  // transfer the prompt into meaning query based on chat & response history
   const queries = await transformQuery(prompt);
-  console.log("Query = ", queries);
 
   // create vector embeddings
-  const queryVector = await embeddings.embedQuery(queries);
+  const queryVector = await googleGenAIEmbeddings.embedQuery(queries);
 
   // search vector in the database
   const searchResults = await pineconeIndex.query({
@@ -62,6 +55,7 @@ async function chatting(prompt) {
     parts: [{ text: queries }],
   });
 
+  // generate content using Gemini
   const response = await ai.models.generateContent({
     model: "gemini-2.0-flash",
     contents: History,
