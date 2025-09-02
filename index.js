@@ -1,19 +1,21 @@
-import * as dotenv from "dotenv";
-dotenv.config();
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { Pinecone } from "@pinecone-database/pinecone";
 import { PineconeStore } from "@langchain/pinecone";
+import { pinecone, googleGenAIEmbeddings } from "./config";
+
+async function loadPDF(pdfPath) {
+  const pdfLoader = new PDFLoader(pdfPath);
+  const rawDocs = await pdfLoader.load();
+  return rawDocs;
+}
 
 async function indexDocument() {
-  // Load the PDF file
+  // step 1: load the pdf file
   const PDF_PATH = "./dsa.pdf";
-  const pdfLoader = new PDFLoader(PDF_PATH);
-  const rawDocs = await pdfLoader.load();
+  const rawDocs = await loadPDF(PDF_PATH);
   console.log("PDF loaded");
 
-  // Create the chunk of the PDF
+  // step 2: create the chunks of pdf
   const textSplitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
     chunkOverlap: 200,
@@ -21,20 +23,12 @@ async function indexDocument() {
   const chunkedDocs = await textSplitter.splitDocuments(rawDocs);
   console.log("Chunking completed");
 
-  // Vector Embedding model
-  const embeddings = new GoogleGenerativeAIEmbeddings({
-    apiKey: process.env.GEMINI_API_KEY,
-    model: "text-embedding-004",
-  });
-  console.log("Embedding model configured");
-
-  // Intialize Pinecone client
-  const pinecone = new Pinecone();
+  // step 3: initialize pinecone index
   const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME);
   console.log("Pinecone configured");
 
-  // langchain (chunking, embeding, database)
-  await PineconeStore.fromDocuments(chunkedDocs, embeddings, {
+  // step 4: langchain (chunking, embeding, database)
+  await PineconeStore.fromDocuments(chunkedDocs, googleGenAIEmbeddings, {
     pineconeIndex,
     maxConcurrency: 5,
   });
