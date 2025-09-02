@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+
 import readlineSync from "readline-sync";
 import { GoogleGenAI } from "@google/genai";
-import { googleGenAIEmbeddings } from "./config";
+import { pineconeIndex, googleGenAIEmbeddings } from "./config/index.js";
 
 const ai = new GoogleGenAI({});
 const History = [];
@@ -26,7 +26,6 @@ async function transformQuery(prompt) {
   });
 
   History.pop();
-
   return response.text;
 }
 

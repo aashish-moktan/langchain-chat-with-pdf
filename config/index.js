@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 dotenv.config();
+
 import { Pinecone } from "@pinecone-database/pinecone";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
@@ -13,7 +14,4 @@ const googleGenAIEmbeddings = new GoogleGenerativeAIEmbeddings({
   model: "text-embedding-004",
 });
 
-module.exports = {
-  pineconeIndex,
-  googleGenAIEmbeddings,
-};
+export { pineconeIndex, googleGenAIEmbeddings };

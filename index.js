@@ -11,7 +11,7 @@ async function loadPDF(pdfPath) {
 
 async function indexDocument() {
   // step 1: load the pdf file
-  const PDF_PATH = "./dsa.pdf";
+  const PDF_PATH = "./data/dsa.pdf";
   const rawDocs = await loadPDF(PDF_PATH);
   console.log("PDF loaded");
 
